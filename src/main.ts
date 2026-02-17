@@ -17,6 +17,8 @@ canvas.width = gridSize * cellSize;
 canvas.height = gridSize * cellSize;
 
 let selectedCell: { x: number; y: number } | null = null;
+let unit: {x: number, y: number} = {x:5,y:5};
+let selectedUnit: boolean = false;
 
 function drawGrid(): void {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -28,6 +30,10 @@ function drawGrid(): void {
       ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
   }
+
+  ctx.fillStyle = "red"
+  ctx.fillRect(unit.x * cellSize + 5, unit.y * cellSize + 5, 30, 30)
+
 
   if (selectedCell) {
     const sx = selectedCell.x * cellSize;
@@ -48,8 +54,21 @@ canvas.addEventListener("click", (event: MouseEvent) => {
 
   if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
     selectedCell = { x, y };
+    if(selectedUnit) {
+      selectedUnit = false;
+      unit.x = selectedCell.x;
+      unit.y = selectedCell.y;
+    }
+    else if(selectedCell.x == unit.x && selectedCell.y == unit.y) {
+      selectedUnit = true;
+      console.log("clic sur unité, selectedUnit :", selectedUnit);
+    }
     drawGrid();
   }
 });
 
 drawGrid();
+
+
+// ------------- UTILITAIREs -------------------------- //
+
