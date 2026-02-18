@@ -16,8 +16,18 @@ const cellSize = 40;
 canvas.width = gridSize * cellSize;
 canvas.height = gridSize * cellSize;
 
-let selectedCell: { x: number; y: number } | null = null;
-let unit: {x: number, y: number, goodGroundSpeed: number} = {x:5,y:5, goodGroundSpeed: 2};
+type coord = {
+  x: number,
+  y: number
+}
+
+type unitProfile = {
+  coords: coord,
+  ggSpeed: number
+}
+
+let selectedCell: coord | null = null;
+let unit: unitProfile = {coords:{x:5, y:5}, ggSpeed: 2};
 let selectedUnit: boolean = false;
 
 function drawGrid(): void {
@@ -32,7 +42,7 @@ function drawGrid(): void {
   }
 
   ctx.fillStyle = "red"
-  ctx.fillRect(unit.x * cellSize + 5, unit.y * cellSize + 5, 30, 30)
+  ctx.fillRect(unit.coords.x * cellSize + 5, unit.coords.y * cellSize + 5, 30, 30)
 
 
   if (selectedCell) {
@@ -41,6 +51,18 @@ function drawGrid(): void {
     ctx.strokeStyle = "#ff8c00";
     ctx.lineWidth = 3;
     ctx.strokeRect(sx + 1, sy + 1, cellSize - 2, cellSize - 2);
+  }
+
+  if(selectedUnit) {
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
+      if(x <= unit.coords.x + unit.ggSpeed && x >= unit.coords.x - unit.ggSpeed && y <= unit.coords.y + unit.ggSpeed && y >= unit.coords.y - unit.ggSpeed) {
+        ctx.fillStyle = "green";
+        ctx.fillRect(x* cellSize + 5, y * cellSize + 5, 30, 30);
+      }
+     
+    }
+  }
   }
 }
 
@@ -55,17 +77,17 @@ canvas.addEventListener("click", (event: MouseEvent) => {
   if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
     selectedCell = { x, y };
     if(selectedUnit) {
-      let diffX:number = selectedCell.x - unit.x;
-      let diffY:number = selectedCell.y - unit.y;
-      if(diffX > unit.goodGroundSpeed || diffY > unit.goodGroundSpeed) {
+      let diffX:number = selectedCell.x - unit.coords.x;
+      let diffY:number = selectedCell.y - unit.coords.y;
+      if(diffX > unit.ggSpeed || diffY > unit.ggSpeed) {
         console.log("too far away !");
       } else {
         selectedUnit = false;
-        unit.x = selectedCell.x;
-        unit.y = selectedCell.y;
+        unit.coords.x = selectedCell.x;
+        unit.coords.y = selectedCell.y;
       }
     }
-    else if(selectedCell.x == unit.x && selectedCell.y == unit.y) {
+    else if(selectedCell.x == unit.coords.x && selectedCell.y == unit.coords.y) {
       selectedUnit = true;
       console.log("clic sur unité, selectedUnit :", selectedUnit);
     }
