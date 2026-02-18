@@ -1,7 +1,13 @@
+import { type coord } from "./types";
+import { type unitProfile } from "./types";
+
 const canvasEl = document.getElementById("grid");
 if (!(canvasEl instanceof HTMLCanvasElement)) {
   throw new Error("Canvas #grid introuvable.");
 }
+
+const btnPhase = document.getElementById("btn-phase");
+btnPhase?.addEventListener("click", endPhase );
 
 const maybeCtx = canvasEl.getContext("2d");
 if (maybeCtx === null) {
@@ -16,53 +22,27 @@ const cellSize = 40;
 canvas.width = gridSize * cellSize;
 canvas.height = gridSize * cellSize;
 
-type coord = {
-  x: number,
-  y: number
-}
 
-type unitProfile = {
-  coords: coord,
-  ggSpeed: number
-}
 
 let selectedCell: coord | null = null;
 let unit: unitProfile = {coords:{x:5, y:5}, ggSpeed: 2};
+let ennemy: unitProfile = {coords: {x:5, y:0}, ggSpeed: 2};
 let selectedUnit: boolean = false;
 
-function drawGrid(): void {
+function render(): void {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.strokeStyle = "#444";
-  ctx.lineWidth = 1;
-  for (let y = 0; y < gridSize; y++) {
-    for (let x = 0; x < gridSize; x++) {
-      ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
-    }
-  }
+  drawGrid();
 
-  ctx.fillStyle = "red"
-  ctx.fillRect(unit.coords.x * cellSize + 5, unit.coords.y * cellSize + 5, 30, 30)
-
+  drawUnit("blue", unit);
+  drawUnit("red", ennemy);
 
   if (selectedCell) {
-    const sx = selectedCell.x * cellSize;
-    const sy = selectedCell.y * cellSize;
-    ctx.strokeStyle = "#ff8c00";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(sx + 1, sy + 1, cellSize - 2, cellSize - 2);
+    outlineCell(selectedCell);
   }
 
   if(selectedUnit) {
-  for (let y = 0; y < gridSize; y++) {
-    for (let x = 0; x < gridSize; x++) {
-      if(x <= unit.coords.x + unit.ggSpeed && x >= unit.coords.x - unit.ggSpeed && y <= unit.coords.y + unit.ggSpeed && y >= unit.coords.y - unit.ggSpeed) {
-        ctx.fillStyle = "green";
-        ctx.fillRect(x* cellSize + 5, y * cellSize + 5, 30, 30);
-      }
-     
-    }
-  }
+    drawSpeedRange();
   }
 }
 
@@ -91,12 +71,47 @@ canvas.addEventListener("click", (event: MouseEvent) => {
       selectedUnit = true;
       console.log("clic sur unité, selectedUnit :", selectedUnit);
     }
-    drawGrid();
+    render();
   }
 });
 
-drawGrid();
+render();
 
 
 // ------------- UTILITAIREs -------------------------- //
 
+function drawGrid() {
+  ctx.strokeStyle = "#444";
+  ctx.lineWidth = 1;
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
+      ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+    }
+  }
+}
+
+function drawUnit(color: string, unit: unitProfile) {
+  ctx.fillStyle = color;
+  ctx.fillRect(unit.coords.x * cellSize + 5, unit.coords.y * cellSize + 5, 30, 30);
+}
+
+function outlineCell(selectedCell: coord) {
+    ctx.strokeStyle = "#ff8c00";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(selectedCell.x * cellSize + 1, selectedCell.y * cellSize + 1, cellSize - 2, cellSize - 2);
+}
+
+function drawSpeedRange() {
+    for (let y = 0; y < gridSize; y++) {
+      for (let x = 0; x < gridSize; x++) {
+        if(x <= unit.coords.x + unit.ggSpeed && x >= unit.coords.x - unit.ggSpeed && y <= unit.coords.y + unit.ggSpeed && y >= unit.coords.y - unit.ggSpeed) {
+          ctx.fillStyle = "green";
+          ctx.fillRect(x* cellSize + 5, y * cellSize + 5, 30, 30);
+        }
+      }
+    }
+}
+
+function endPhase() {
+  console.log("fin de la phase");
+}
