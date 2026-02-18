@@ -17,7 +17,7 @@ canvas.width = gridSize * cellSize;
 canvas.height = gridSize * cellSize;
 
 let selectedCell: { x: number; y: number } | null = null;
-let unit: {x: number, y: number} = {x:5,y:5};
+let unit: {x: number, y: number, goodGroundSpeed: number} = {x:5,y:5, goodGroundSpeed: 2};
 let selectedUnit: boolean = false;
 
 function drawGrid(): void {
@@ -55,9 +55,15 @@ canvas.addEventListener("click", (event: MouseEvent) => {
   if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
     selectedCell = { x, y };
     if(selectedUnit) {
-      selectedUnit = false;
-      unit.x = selectedCell.x;
-      unit.y = selectedCell.y;
+      let diffX:number = selectedCell.x - unit.x;
+      let diffY:number = selectedCell.y - unit.y;
+      if(diffX > unit.goodGroundSpeed || diffY > unit.goodGroundSpeed) {
+        console.log("too far away !");
+      } else {
+        selectedUnit = false;
+        unit.x = selectedCell.x;
+        unit.y = selectedCell.y;
+      }
     }
     else if(selectedCell.x == unit.x && selectedCell.y == unit.y) {
       selectedUnit = true;
