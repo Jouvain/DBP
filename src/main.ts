@@ -27,7 +27,10 @@ canvas.height = gridSize * cellSize;
 let selectedCell: coord | null = null;
 let unit: unitProfile = {coords:{x:5, y:5}, ggSpeed: 2};
 let ennemy: unitProfile = {coords: {x:5, y:0}, ggSpeed: 2};
-let selectedUnit: boolean = false;
+// let selectedUnit: boolean = false;
+let selectedUnit: unitProfile = {coords: null, ggSpeed: 0};
+let isUnitSelected: boolean = false;
+let unitList: unitProfile[] = [unit, ennemy];
 
 function render(): void {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -41,7 +44,7 @@ function render(): void {
     outlineCell(selectedCell);
   }
 
-  if(selectedUnit) {
+  if(isUnitSelected) {
     drawSpeedRange();
   }
 }
@@ -56,20 +59,22 @@ canvas.addEventListener("click", (event: MouseEvent) => {
 
   if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
     selectedCell = { x, y };
-    if(selectedUnit) {
-      let diffX:number = selectedCell.x - unit.coords.x;
-      let diffY:number = selectedCell.y - unit.coords.y;
-      if(diffX > unit.ggSpeed || diffY > unit.ggSpeed) {
-        console.log("too far away !");
-      } else {
-        selectedUnit = false;
-        unit.coords.x = selectedCell.x;
-        unit.coords.y = selectedCell.y;
-      }
+    if(isUnitSelected) {
+
+      moveUnit(selectedCell, selectedUnit);
+      // let diffX:number = selectedCell.x - unit.coords.x;
+      // let diffY:number = selectedCell.y - unit.coords.y;
+      // if(diffX > unit.ggSpeed || diffY > unit.ggSpeed) {
+      //   console.log("too far away !");
+      // } else {
+      //   selectedUnit = false;
+      //   unit.coords.x = selectedCell.x;
+      //   unit.coords.y = selectedCell.y;
+      // }
     }
-    else if(selectedCell.x == unit.coords.x && selectedCell.y == unit.coords.y) {
-      selectedUnit = true;
-      console.log("clic sur unité, selectedUnit :", selectedUnit);
+    else if(selectedCell.x == unit.coords?.x && selectedCell.y == unit.coords?.y) {
+      selectedUnit = {coords: {x: unit.coords?.x, y: unit.coords?.y}, ggSpeed: unit.ggSpeed};
+      isUnitSelected = true;
     }
     render();
   }
@@ -92,7 +97,7 @@ function drawGrid() {
 
 function drawUnit(color: string, unit: unitProfile) {
   ctx.fillStyle = color;
-  ctx.fillRect(unit.coords.x * cellSize + 5, unit.coords.y * cellSize + 5, 30, 30);
+  ctx.fillRect(unit.coords!.x * cellSize + 5, unit.coords!.y * cellSize + 5, 30, 30);
 }
 
 function outlineCell(selectedCell: coord) {
@@ -104,7 +109,7 @@ function outlineCell(selectedCell: coord) {
 function drawSpeedRange() {
     for (let y = 0; y < gridSize; y++) {
       for (let x = 0; x < gridSize; x++) {
-        if(x <= unit.coords.x + unit.ggSpeed && x >= unit.coords.x - unit.ggSpeed && y <= unit.coords.y + unit.ggSpeed && y >= unit.coords.y - unit.ggSpeed) {
+        if(x <= unit.coords!.x + unit.ggSpeed && x >= unit.coords!.x - unit.ggSpeed && y <= unit.coords!.y + unit.ggSpeed && y >= unit.coords!.y - unit.ggSpeed) {
           ctx.fillStyle = "green";
           ctx.fillRect(x* cellSize + 5, y * cellSize + 5, 30, 30);
         }
@@ -114,4 +119,25 @@ function drawSpeedRange() {
 
 function endPhase() {
   console.log("fin de la phase");
+}
+
+function moveUnit(selectedCell: coord, selectedUnit: unitProfile) {
+      let diffX:number = selectedCell.x - selectedUnit.coords!.x;
+      let diffY:number = selectedCell.y - selectedUnit.coords!.y;
+      if(diffX > selectedUnit.ggSpeed || diffY > selectedUnit.ggSpeed) {
+        console.log("too far away !");
+      } else if (checkIsCellOccupied(unitList, selectedCell)) {
+        console.log("Cell already full !");
+      } else {
+        selectedUnit.coords!.x = selectedCell.x;
+        selectedUnit.coords!.y = selectedCell.y;
+        console.log("SelectedCell : ", selectedCell);
+        console.log("SelectedUnit : ", selectedUnit);
+        unit = selectedUnit;
+      }
+      isUnitSelected = false;
+}
+
+function checkIsCellOccupied(unitList: unitProfile[], cell:coord): boolean {
+  return unitList.some(unit => unit.coords?.x === cell.x && unit.coords?.y === cell.y);
 }
