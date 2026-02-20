@@ -25,20 +25,31 @@ canvas.height = gridSize * cellSize;
 
 
 let selectedCell: coord | null = null;
-let unit: unitProfile = {coords:{x:5, y:5}, ggSpeed: 2};
-let ennemy: unitProfile = {coords: {x:5, y:0}, ggSpeed: 2};
+let unit: unitProfile = {coords:{x:5, y:5}, ggSpeed: 2, facing: "N"};
+let ennemy: unitProfile = {coords: {x:5, y:0}, ggSpeed: 2, facing: "S"};
+let ennemy2: unitProfile = {coords: {x:4, y:0}, ggSpeed: 2, facing: "W"};
+let ennemy3: unitProfile = {coords: {x:6, y:0}, ggSpeed: 2, facing: "E"};
 // let selectedUnit: boolean = false;
-let selectedUnit: unitProfile = {coords: null, ggSpeed: 0};
+let selectedUnit: unitProfile = {coords: null, ggSpeed: 0, facing: "N"};
 let isUnitSelected: boolean = false;
-let unitList: unitProfile[] = [unit, ennemy];
+let unitList: unitProfile[] = [unit, ennemy, ennemy2, ennemy3];
+let ennemies: unitProfile[] = [ennemy, ennemy2, ennemy3];
+let friends: unitProfile[]= [unit];
 
 function render(): void {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   drawGrid();
+  ennemies.forEach(unit => {
+    drawUnit("red", unit);
+  });
 
-  drawUnit("blue", unit);
-  drawUnit("red", ennemy);
+  friends.forEach(unit => {
+    drawUnit("blue", unit);
+  });
+
+  // drawUnit("blue", unit);
+  // drawUnit("red", ennemy);
 
   if (selectedCell) {
     outlineCell(selectedCell);
@@ -73,7 +84,7 @@ canvas.addEventListener("click", (event: MouseEvent) => {
       // }
     }
     else if(selectedCell.x == unit.coords?.x && selectedCell.y == unit.coords?.y) {
-      selectedUnit = {coords: {x: unit.coords?.x, y: unit.coords?.y}, ggSpeed: unit.ggSpeed};
+      selectedUnit = {coords: {x: unit.coords?.x, y: unit.coords?.y}, ggSpeed: unit.ggSpeed, facing: unit.facing};
       isUnitSelected = true;
     }
     render();
@@ -98,6 +109,23 @@ function drawGrid() {
 function drawUnit(color: string, unit: unitProfile) {
   ctx.fillStyle = color;
   ctx.fillRect(unit.coords!.x * cellSize + 5, unit.coords!.y * cellSize + 5, 30, 30);
+  ctx.fillStyle = "white";
+  switch(unit.facing) {
+    case "N":
+      ctx.fillRect(unit.coords!.x * cellSize + 5, unit.coords!.y * cellSize + 10, 30, 5);
+      break;
+    case "E":
+      ctx.fillRect(unit.coords!.x * cellSize + 10, unit.coords!.y * cellSize + 5, 5, 30);
+      break;
+    case "S":
+      ctx.fillRect(unit.coords!.x * cellSize + 5, unit.coords!.y * cellSize + 25, 30, 5);
+      break;
+    case "W":
+      ctx.fillRect(unit.coords!.x * cellSize + 25, unit.coords!.y * cellSize + 5, 5, 30);
+      break;
+    default:
+      console.log("Oups, no facing ??");
+  }
 }
 
 function outlineCell(selectedCell: coord) {

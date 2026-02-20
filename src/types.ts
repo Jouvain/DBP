@@ -5,5 +5,6 @@ export type coord = {
 
 export type unitProfile = {
   coords: coord | null,
-  ggSpeed: number
+  ggSpeed: number,
+  facing: "N" | "E" | "S" | "W";
 }
