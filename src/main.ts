@@ -26,13 +26,11 @@ canvas.height = gridSize * cellSize;
 
 
 let selectedCell: coord | null = null;
-let unit: unitProfile = {coords:{x:5, y:5}, ggSpeed: 2, facing: "N"};
-let ennemy: unitProfile = {coords: {x:5, y:0}, ggSpeed: 2, facing: "S"};
-let ennemy2: unitProfile = {coords: {x:4, y:0}, ggSpeed: 2, facing: "W"};
-let ennemy3: unitProfile = {coords: {x:6, y:0}, ggSpeed: 2, facing: "E"};
-// let selectedUnit: boolean = false;
-let selectedUnit: unitProfile = {coords: null, ggSpeed: 0, facing: "N"};
-let isUnitSelected: boolean = false;
+let unit: unitProfile = {id: 1, coords:{x:5, y:5}, ggSpeed: 2, facing: "N"};
+let ennemy: unitProfile = {id: 2, coords: {x:5, y:0}, ggSpeed: 2, facing: "S"};
+let ennemy2: unitProfile = {id: 3, coords: {x:4, y:0}, ggSpeed: 2, facing: "W"};
+let ennemy3: unitProfile = {id: 4, coords: {x:6, y:0}, ggSpeed: 2, facing: "E"};
+let selectedUnitId: number | null = null;
 let unitList: unitProfile[] = [unit, ennemy, ennemy2, ennemy3];
 let ennemies: unitProfile[] = [ennemy, ennemy2, ennemy3];
 let friends: unitProfile[]= [unit];
@@ -49,15 +47,16 @@ function render(): void {
     drawUnit("blue", unit);
   });
 
-  // drawUnit("blue", unit);
-  // drawUnit("red", ennemy);
 
   if (selectedCell) {
     outlineCell(selectedCell);
   }
 
-  if(isUnitSelected) {
-    drawSpeedRange(selectedUnit);
+  if(selectedUnitId !== null) {
+    const selectedUnit = unitList.find(unit => unit.id === selectedUnitId);
+    if (selectedUnit) {
+      drawSpeedRange(selectedUnit);
+    }
   }
 }
 
@@ -70,10 +69,14 @@ canvas.addEventListener("click", (event: MouseEvent) => {
   const y = Math.floor(mouseY / cellSize);
 
   if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
-    selectedCell = { x, y };
-    if(isUnitSelected) {
-
-      moveUnit(selectedCell, selectedUnit);
+    const clickedCell: coord = { x, y };
+    selectedCell = clickedCell;
+    if(selectedUnitId !== null) {
+      const selectedUnit = unitList.find(unit => unit.id === selectedUnitId);
+      if (selectedUnit) {
+        moveUnit(clickedCell, selectedUnit);
+      }
+      selectedUnitId = null;
       // let diffX:number = selectedCell.x - unit.coords.x;
       // let diffY:number = selectedCell.y - unit.coords.y;
       // if(diffX > unit.ggSpeed || diffY > unit.ggSpeed) {
@@ -84,10 +87,13 @@ canvas.addEventListener("click", (event: MouseEvent) => {
       //   unit.coords.y = selectedCell.y;
       // }
     }
-    else if(selectedCell.x == unit.coords?.x && selectedCell.y == unit.coords?.y) {
-      // selectedUnit = {coords: {x: unit.coords?.x, y: unit.coords?.y}, ggSpeed: unit.ggSpeed, facing: unit.facing};
-      selectedUnit = unit;
-      isUnitSelected = true;
+    else {
+      const clickedFriend = friends.find(
+        friend => friend.coords?.x === clickedCell.x && friend.coords?.y === clickedCell.y
+      );
+      if (clickedFriend) {
+        selectedUnitId = clickedFriend.id;
+      }
     }
     render();
   }
@@ -160,18 +166,18 @@ function moveUnit(selectedCell: coord, selectedUnit: unitProfile) {
       let diffY:number = selectedCell.y - selectedUnit.coords!.y;
       if(diffX > selectedUnit.ggSpeed || diffY > selectedUnit.ggSpeed) {
         console.log("too far away !");
-      } else if (checkIsCellOccupied(unitList, selectedCell)) {
+      } else if (checkIsCellOccupied(unitList, selectedCell, selectedUnit.id)) {
         console.log("Cell already full !");
       } else {
         selectedUnit.coords!.x = selectedCell.x;
         selectedUnit.coords!.y = selectedCell.y;
         console.log("SelectedCell : ", selectedCell);
         console.log("SelectedUnit : ", selectedUnit);
-        // unit = selectedUnit;
       }
-      isUnitSelected = false;
 }
 
-function checkIsCellOccupied(unitList: unitProfile[], cell:coord): boolean {
-  return unitList.some(unit => unit.coords?.x === cell.x && unit.coords?.y === cell.y);
+function checkIsCellOccupied(unitList: unitProfile[], cell:coord, ignoredUnitId: number | null = null): boolean {
+  return unitList.some(
+    unit => unit.id !== ignoredUnitId && unit.coords?.x === cell.x && unit.coords?.y === cell.y
+  );
 }

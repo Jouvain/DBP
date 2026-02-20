@@ -6,6 +6,7 @@ export type coord = {
 export type facing = "N" | "E" | "S" | "W";
 
 export type unitProfile = {
+  id: number,
   coords: coord | null,
   ggSpeed: number,
   facing: "N" | "E" | "S" | "W";
