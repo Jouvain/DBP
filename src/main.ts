@@ -1,5 +1,6 @@
 import { type coord } from "./types";
 import { type unitProfile } from "./types";
+// import { type facing } from "./types";
 
 const canvasEl = document.getElementById("grid");
 if (!(canvasEl instanceof HTMLCanvasElement)) {
@@ -56,7 +57,7 @@ function render(): void {
   }
 
   if(isUnitSelected) {
-    drawSpeedRange();
+    drawSpeedRange(selectedUnit);
   }
 }
 
@@ -84,7 +85,8 @@ canvas.addEventListener("click", (event: MouseEvent) => {
       // }
     }
     else if(selectedCell.x == unit.coords?.x && selectedCell.y == unit.coords?.y) {
-      selectedUnit = {coords: {x: unit.coords?.x, y: unit.coords?.y}, ggSpeed: unit.ggSpeed, facing: unit.facing};
+      // selectedUnit = {coords: {x: unit.coords?.x, y: unit.coords?.y}, ggSpeed: unit.ggSpeed, facing: unit.facing};
+      selectedUnit = unit;
       isUnitSelected = true;
     }
     render();
@@ -128,13 +130,17 @@ function drawUnit(color: string, unit: unitProfile) {
   }
 }
 
+// function changeFacing(unit: unitProfile, newFacing: string) {
+
+// }
+
 function outlineCell(selectedCell: coord) {
     ctx.strokeStyle = "#ff8c00";
     ctx.lineWidth = 3;
     ctx.strokeRect(selectedCell.x * cellSize + 1, selectedCell.y * cellSize + 1, cellSize - 2, cellSize - 2);
 }
 
-function drawSpeedRange() {
+function drawSpeedRange(unit: unitProfile) {
     for (let y = 0; y < gridSize; y++) {
       for (let x = 0; x < gridSize; x++) {
         if(x <= unit.coords!.x + unit.ggSpeed && x >= unit.coords!.x - unit.ggSpeed && y <= unit.coords!.y + unit.ggSpeed && y >= unit.coords!.y - unit.ggSpeed) {
@@ -161,7 +167,7 @@ function moveUnit(selectedCell: coord, selectedUnit: unitProfile) {
         selectedUnit.coords!.y = selectedCell.y;
         console.log("SelectedCell : ", selectedCell);
         console.log("SelectedUnit : ", selectedUnit);
-        unit = selectedUnit;
+        // unit = selectedUnit;
       }
       isUnitSelected = false;
 }
